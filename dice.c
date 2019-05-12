@@ -102,27 +102,23 @@ int main(int argc, char **argv){
     }
   }
 
-  if(rand_plus != 0){
-    printf("(%s) -> %ld+%ld -> ", dice_code, result, rand_plus);
-    result = result + rand_plus;
-    printf("%ld\n", result);
+  if(rand_count >= 2){
+    if(rand_plus != 0){
+      printf("(%s) -> %ld[%s]+%ld -> ", dice_code, result, rand_arr_text, rand_plus);
+      result = result + rand_plus;
+      printf("%ld\n", result);
+    }else{
+      printf("(%s) -> %ld[%s] -> %ld", dice_code, result, rand_arr_text, result);
+    }
   }else{
-    printf("(%s) -> %ld", dice_code, result);
+    if(rand_plus != 0){
+      printf("(%s) -> %ld+%ld -> ", dice_code, result, rand_plus);
+      result = result + rand_plus;
+      printf("%ld\n", result);
+    }else{
+      printf("(%s) -> %ld", dice_code, result);
+    }
   }
-
-
-//    strcat(rand_arr_text, "+");
-//    char buf[32];
-//    snprintf(buf, 32, "%ld", rand_plus);
-//    strcat(rand_arr_text, buf);
-
-//
-//  printf("input: %s\n", input);
-//  printf("rand count: %ld\n", rand_count);
-//  printf("rand base: %ld\n", rand_base);
-//  printf("rand plus: %ld\n", rand_plus);
-//  printf("arr_txt: %s\n", rand_arr_text);
-//  printf("Result: %ld\n", result);
 
   regfree(&regexp_buf);
 
