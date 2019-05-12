@@ -24,6 +24,9 @@ int main(int argc, char **argv){
     input = argv[1];
   }
 
+  // コードだけ抽出する
+  char dice_code[sizeof(input)/sizeof(input[0])];
+
   const char regexp[] = "([0-9]+)([Dd]{1})([0-9]+)((\\+([0-9]+))?)";
   regex_t regexp_buf;
 
@@ -43,6 +46,7 @@ int main(int argc, char **argv){
 
       char str[32] = "";
       switch(i){
+        case 0:
         case 1:
         case 3:
         case 6:
@@ -51,6 +55,9 @@ int main(int argc, char **argv){
           }
 
           switch(i){
+            case 0:
+              strcpy(dice_code, str);
+              break;
             case 1:
               rand_count = strtol(str, NULL, 10);
               break;
@@ -96,19 +103,26 @@ int main(int argc, char **argv){
   }
 
   if(rand_plus != 0){
+    printf("(%s) -> %ld+%ld -> ", dice_code, result, rand_plus);
     result = result + rand_plus;
-    strcat(rand_arr_text, "+");
-    char buf[32];
-    snprintf(buf, 32, "%ld", rand_plus);
-    strcat(rand_arr_text, buf);
+    printf("%ld\n", result);
+  }else{
+    printf("(%s) -> %ld", dice_code, result);
   }
 
-  printf("input: %s\n", input);
-  printf("rand count: %ld\n", rand_count);
-  printf("rand base: %ld\n", rand_base);
-  printf("rand plus: %ld\n", rand_plus);
-  printf("arr_txt: %s\n", rand_arr_text);
-  printf("Result: %ld\n", result);
+
+//    strcat(rand_arr_text, "+");
+//    char buf[32];
+//    snprintf(buf, 32, "%ld", rand_plus);
+//    strcat(rand_arr_text, buf);
+
+//
+//  printf("input: %s\n", input);
+//  printf("rand count: %ld\n", rand_count);
+//  printf("rand base: %ld\n", rand_base);
+//  printf("rand plus: %ld\n", rand_plus);
+//  printf("arr_txt: %s\n", rand_arr_text);
+//  printf("Result: %ld\n", result);
 
   regfree(&regexp_buf);
 
