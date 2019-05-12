@@ -27,6 +27,7 @@ int main(int argc, char **argv){
   // コードだけ抽出する
   char dice_code[sizeof(input)/sizeof(input[0])];
 
+  // 1d6+1d4みたいな表記どう対応しましょう？
   const char regexp[] = "([0-9]+)([Dd]{1})([0-9]+)((\\+([0-9]+))?)";
   regex_t regexp_buf;
 
@@ -102,6 +103,7 @@ int main(int argc, char **argv){
     }
   }
 
+  // 結構雑に実装した感がある
   if(rand_count >= 2){
     if(rand_plus != 0){
       printf("(%s) -> %ld[%s]+%ld -> ", dice_code, result, rand_arr_text, rand_plus);
