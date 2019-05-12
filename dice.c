@@ -25,7 +25,7 @@ int main(int argc, char **argv){
   }
 
   // コードだけ抽出する
-  char dice_code[32];
+  char dice_code[32] = "";
 
   // 1d6+1d4みたいな表記どう対応しましょう？
   const char regexp[] = "([0-9]+)([Dd]{1})([0-9]+)((\\+([0-9]+))?)";
@@ -71,6 +71,9 @@ int main(int argc, char **argv){
           break;
       }
     }
+  }else{
+    strcat(dice_code, "1d6");
+    printf("dice_code: %s\n", dice_code);
   }
 
   // 上書きされててもここで宣言すれば多分問題ないっしょ
