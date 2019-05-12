@@ -2,34 +2,133 @@
 #include <stdlib.h>
 #include <time.h>
 #include <regex.h>
+#include <string.h>
 
-int get_rand(int count);
+long get_rand(long count, long seed);
+int get_long_digit(long count_i);
 
 int main(int argc, char **argv){
-  int result = 0;
-  int count = atoi(argv[1]);
-  printf("1d%d\n", count);
+  long result = 0;
 
-  printf("ARGV is %d count\n", argc-1);
+  // 初期値
+  long rand_base = 6;
+  long rand_count = 1;
+  long rand_plus = 0;
+  char *input;
 
-  if(argc > 1){
-    for(int i = 1; i<argc;++i){
-      printf("%d: ", i);
-      printf("%s\n", argv[i]);
+  // これargv[0]に1d6とか入ってたらどうなるんだろう...
+  // ↑ダイス振れるわ。ウケる。
+  if(argc == 1){
+    input = argv[0];
+  }else{
+    input = argv[1];
+  }
+
+  const char regexp[] = "([0-9]+)([Dd]{1})([0-9]+)((\\+([0-9]+))?)";
+  regex_t regexp_buf;
+
+  if(regcomp(&regexp_buf, regexp, REG_EXTENDED|REG_NEWLINE) != 0){
+    printf("regex compile failed");
+    return 1;
+  }
+
+  regmatch_t reg_match[7];
+  int size = sizeof(reg_match)/sizeof(regmatch_t);
+
+  // 正規表現に一致したら色々上書きする
+  if(regexec(&regexp_buf, input, size, &reg_match[0], 0) == 0){
+    for(int i = 0; i < size; ++i){
+      int start_index = reg_match[i].rm_so;
+      int end_index = reg_match[i].rm_eo;
+
+      char str[32] = "";
+      switch(i){
+        case 1:
+        case 3:
+        case 6:
+          for(int ii = start_index; ii < end_index; ++ii){
+            str[ii - start_index] = input[ii];
+          }
+
+          switch(i){
+            case 1:
+              rand_count = strtol(str, NULL, 10);
+              break;
+            case 3:
+              rand_base = strtol(str, NULL, 10);
+              break;
+            case 6:
+              rand_plus = strtol(str, NULL, 10);
+          }
+          break;
+      }
     }
   }
 
+  // 上書きされててもここで宣言すれば多分問題ないっしょ
+  long rand_arr[rand_count];
 
-  result = get_rand(count);
+  for(int i = 0; i < rand_count; ++i){
+    long random = 0;
+    random = get_rand(rand_base, i);
+    result = result + random;
+    rand_arr[i] = random;
+  }
 
-  printf("1d%d", count);
-  printf(": %d", result);
+  // これ計算合ってるのかわからんけどオーバーフローしたことないから多分問題ないんじゃないかな
+  char rand_arr_text[((sizeof(rand_arr) / sizeof(rand_arr[0])) * get_long_digit(rand_base)) + (sizeof(rand_arr) / sizeof(rand_arr[0])) + 1];
+
+  // 100回以上振るならいっぱいにする
+  // まずそんなに振らんやろってのはあるが
+  if(rand_count > 100){
+    strcat(rand_arr_text, "いっぱい");
+  }else{
+    for(int i = 0; i < rand_count; ++i){
+      char buf[32];
+      snprintf(buf, 32, "%ld", rand_arr[i]);
+      if(!(i == 0)){
+        strcat(rand_arr_text, ",");
+      }else{
+        rand_arr_text[0] = '\0';
+      }
+      strcat(rand_arr_text, buf);
+    }
+  }
+
+  if(rand_plus != 0){
+    result = result + rand_plus;
+    strcat(rand_arr_text, "+");
+    char buf[32];
+    snprintf(buf, 32, "%ld", rand_plus);
+    strcat(rand_arr_text, buf);
+  }
+
+  printf("input: %s\n", input);
+  printf("rand count: %ld\n", rand_count);
+  printf("rand base: %ld\n", rand_base);
+  printf("rand plus: %ld\n", rand_plus);
+  printf("arr_txt: %s\n", rand_arr_text);
+  printf("Result: %ld\n", result);
+
+  regfree(&regexp_buf);
 
   return 0;
 }
 
-int get_rand(int count){
-  srand(time(NULL));
+// 乱数。これでも微妙にガバガバなので困る。
+long get_rand(long count, long seed){
+  long s = ((seed + 1) * 100) / 3;
+  srand(time(NULL) * s);
 
   return rand()%count+1;
+}
+
+// 桁数出してくれるすごいやつ
+int get_long_digit(long count_i){
+  int dig = 0;
+  while(count_i != 0){
+    count_i = count_i /10;
+    ++dig;
+  }
+  return dig;
 }
